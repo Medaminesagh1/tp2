@@ -29,5 +29,47 @@ class TicketMachineTest {
                 // Les montants ont été correctement additionnés  
 		assertEquals(10 + 20, machine.getBalance(), "La balance n'est pas correctement mise à jour");              
 	}
-
+	@Test
+	void cannotPrintTicketInsufficientBalance() {
+		assertFalse(machine.printTicket(), "Le ticket ne devrait pas être imprimé avec une balance insuffisante");
+	}
+	@Test
+	void canPrintTicketSufficientBalance() {
+		machine.insertMoney(PRICE); // Montant suffisant pour le ticket
+		assertTrue(machine.printTicket(), "Le ticket devrait être imprimé avec une balance suffisante");
+	}
+	@Test
+	void balanceDecreasesAfterPrinting() {
+		machine.insertMoney(PRICE);
+		machine.printTicket();
+		assertEquals(0, machine.getBalance(), "La balance devrait être réduite à zéro après l'impression");
+	}
+	@Test
+	void totalAmountIsUpdatedAfterPrinting() {
+		machine.insertMoney(PRICE);
+		assertEquals(0, machine.getTotal(), "Le montant total ne devrait pas être mis à jour avant l'impression");
+		machine.printTicket();
+		assertEquals(PRICE, machine.getTotal(), "Le montant total devrait être mis à jour après l'impression");
+	}
+	@Test
+	void refundReturnsCorrectAmount() {
+		machine.insertMoney(30);
+		assertEquals(0, machine.refund(), "Le montant rendu devrait être égal à la balance");
+	}
+	@Test
+	void refundResetsBalanceToZero() {
+		machine.insertMoney(30);
+		machine.refund();
+		assertEquals(0, machine.getBalance(), "La balance devrait être remise à zéro après le remboursement");
+	}
+	@Test
+	void cannotInsertNegativeAmount() {
+		assertThrows(IllegalArgumentException.class, () -> machine.insertMoney(-10), "Une exception devrait être levée pour un montant négatif");
+	}
+	@Test
+	void cannotInitializeMachineWithNegativePrice() {
+		assertThrows(IllegalArgumentException.class, () -> new TicketMachine(-10), "Une exception devrait être levée pour un prix négatif");
+	}
 }
+
+
